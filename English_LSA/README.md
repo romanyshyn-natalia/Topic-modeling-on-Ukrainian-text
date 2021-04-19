@@ -1,5 +1,5 @@
 # LSA on English texts
-Based on the tutorial 
+From the tutorial https://www.datacamp.com/community/tutorials/discovering-hidden-topics-python
 
 That implementation requires You to install stopwords for nltk.
 
