@@ -1,0 +1,18 @@
+from ua_gec import Corpus
+import stanza
+
+corpus = Corpus(partition="test")
+# stanza.download('uk')
+nlp = stanza.Pipeline('uk')
+doc = nlp("Я хочу їв.")
+
+
+print(*[f'word: {word.text+" "}\tlemma: {word.lemma}' for sent in doc.sentences for word in sent.words], sep='\n')
+
+# res = []
+# for doc in corpus:
+#     # print(doc.source)
+#     res.append(doc.target)
+#     # print(doc.annotated)
+#     # print(doc.meta.region)
+# print(type(res[1]))
