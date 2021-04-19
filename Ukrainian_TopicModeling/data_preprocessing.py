@@ -19,5 +19,5 @@ def lemmatizer(value):
 
 
 if __name__ == "__main__":
-    sent = load_data()[1]
+    sent = load_data()[2]
     print(lemmatizer(sent))
