@@ -1,4 +1,9 @@
 ua_gec
-stanza
-numpy
-pandas
+stanza~=1.2
+numpy~=1.20.2
+pandas~=1.2.4
+sklearn~=0.0
+matplotlib~=3.4.1
+nltk~=3.6.2
+scikit-learn~=0.24.1
+scipy~=1.6.3
