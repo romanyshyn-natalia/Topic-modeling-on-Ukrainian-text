@@ -14,12 +14,14 @@ def load_data():
     """
     Load test dataset from UA-GEC with lowercase text.
     """
-    corpus = Corpus(partition="train")
-
+    corpus_train = Corpus(partition="train")
+    corpus_test = Corpus(partition="test")
     target_corpus = []
-    for doc in corpus:
+    for doc in corpus_train:
         target_corpus.append(doc.target.lower())
-    return " ".join(target_corpus)
+    for doc in corpus_test:
+        target_corpus.append(doc.target.lower())
+    return target_corpus
 
 
 def remove_url(sample_list):
@@ -27,6 +29,14 @@ def remove_url(sample_list):
     Remove URLs from a sample list.
     """
     regex = re.compile(r"//\S+")
+    return [token for token in sample_list if not regex.match(token)]
+
+
+def remove_www(sample_list):
+    """
+    Remove www. URLs from a sample list.
+    """
+    regex = re.compile(r"www.\S+")
     return [token for token in sample_list if not regex.match(token)]
 
 
@@ -51,7 +61,8 @@ def remove_punctuation(sample_list):
     Removes punctuations from text.
     """
     punctuation_marks = string.punctuation + '«' + '…' + '»' + '–' + '...' \
-                        + '“' + '”' + '``' + "''" + '—' + '’' + '.'
+                        + '“' + '”' + '``' + "''" + '—' + '’' + '.' + '....' \
+                        + '//' + '-' + '…' + '⠀' + '…' + '-' + ',' + '/'
     return [word for word in sample_list if word not in punctuation_marks]
 
 
@@ -61,19 +72,23 @@ def normalize(corpus):
         * removing stopwords, punctuation, links, digits
         * split data by word tokens
     """
-    tokens = nltk.word_tokenize(corpus)
-    clean_stopwords = remove_stopwords(tokens)
-    clean_punctuation = remove_punctuation(clean_stopwords)
-    clean_numbers = remove_digits(clean_punctuation)
-    return remove_url(clean_numbers)
+    tokens = [nltk.word_tokenize(sentence) for sentence in corpus]
+    clean_stopwords = [remove_stopwords(sentence_token) for sentence_token in tokens]
+    clean_punctuation = [remove_punctuation(sentence_sample) for sentence_sample in clean_stopwords]
+    clean_numbers = [remove_digits(sentence_sample) for sentence_sample in clean_punctuation]
+    clean_url = [remove_url(sentence_sample) for sentence_sample in clean_numbers]
+    return [remove_www(sentence_sample) for sentence_sample in clean_url]
 
 
 def lemmatizer(tokenized):
     """
     Extract lemmas from words using stanza
     """
-    doc_tokenized = NLP(tokenized)
-    return [word.lemma for sentence in doc_tokenized.sentences for word in sentence.words]
+    result = []
+    for sentence in tokenized:
+        doc_tokenized = NLP(sentence)
+        result.append([word.lemma for sentence in doc_tokenized.sentences for word in sentence.words])
+    return result
 
 
 def preprocess():
@@ -82,7 +97,8 @@ def preprocess():
     """
     loaded_corpus = load_data()
     normalized = normalize(loaded_corpus)
-    return lemmatizer(normalized)
+    lemmas = lemmatizer(normalized)
+    return [" ".join(elem) for elem in lemmas]
 
 
 if __name__ == "__main__":

@@ -7,24 +7,16 @@ import umap.umap_ as umap
 
 clean_data = preprocess()
 
-vectorizer = TfidfVectorizer(max_features=10000, max_df=0.5, use_idf=True, ngram_range=(1, 3))
+vectorizer = TfidfVectorizer(max_features=1000, max_df=0.5, use_idf=True, ngram_range=(1, 3))
 
 tfidf_train_sparse = vectorizer.fit_transform(clean_data)
 terms = vectorizer.get_feature_names()
-
-# tfidf_train_df = pd.DataFrame(tfidf_train_sparse.toarray(), columns=vectorizer.get_feature_names())
-# tfidf_train_df.head()
-
-# lsa_obj = TruncatedSVD(n_components=20, n_iter=100, random_state=42)
-# tfidf_lsa_data = lsa_obj.fit_transform(tfidf_train_df)
-# Sigma = lsa_obj.singular_values_
-# V_T = lsa_obj.components_.T
 
 km = KMeans(n_clusters=10)
 km.fit(tfidf_train_sparse)
 clusters = km.labels_.tolist()
 
-U, Sigma, VT = randomized_svd(tfidf_train_sparse, n_components=20, n_iter=100,
+U, Sigma, VT = randomized_svd(tfidf_train_sparse, n_components=10, n_iter=100,
                               random_state=122)
 # printing the concepts
 for i, comp in enumerate(VT):
@@ -36,6 +28,7 @@ for i, comp in enumerate(VT):
     print(" ")
 
 X_topics = U * Sigma
+print(X_topics.shape)
 embedding = umap.UMAP(n_neighbors=100, min_dist=0.5, random_state=12).fit_transform(X_topics)
 plt.figure(figsize=(7, 5))
 plt.scatter(embedding[:, 0], embedding[:, 1],
@@ -44,9 +37,3 @@ plt.scatter(embedding[:, 0], embedding[:, 1],
             edgecolor='none'
             )
 plt.show()
-
-# sns.barplot(x=list(range(len(Sigma))), y=Sigma)
-# plt.title('Singular values')
-# plt.xlabel('latent components')
-# plt.ylabel('relative importance of each component')
-# plt.show()
