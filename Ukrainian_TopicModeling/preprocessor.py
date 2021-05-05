@@ -5,7 +5,8 @@ import string
 import re
 import nltk
 
-# stanza.download('uk')
+# uncomment for the first time using
+#stanza.download('uk')
 
 NLP = stanza.Pipeline(lang='uk', processors='tokenize, lemma', tokenize_no_ssplit=True)
 
@@ -62,7 +63,7 @@ def remove_punctuation(sample_list):
     """
     punctuation_marks = string.punctuation + '«' + '…' + '»' + '–' + '...' \
                         + '“' + '”' + '``' + "''" + '—' + '’' + '.' + '....' \
-                        + '//' + '-' + '…' + '⠀' + '…' + '-' + ',' + '/'
+                        + '//' + '-' + '…' + '⠀' + '…' + '-' + ',' + '/' + "." + "-"
     return [word for word in sample_list if word not in punctuation_marks]
 
 
@@ -98,7 +99,10 @@ def preprocess():
     loaded_corpus = load_data()
     normalized = normalize(loaded_corpus)
     lemmas = lemmatizer(normalized)
-    return [" ".join(elem) for elem in lemmas]
+    # uncomment for Gensim LSI
+    return lemmas
+    # uncomment for sklearn truncated SVD
+    # return [" ".join(elem) for elem in lemmas]
 
 
 if __name__ == "__main__":
