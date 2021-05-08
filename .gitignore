@@ -1,3 +1,4 @@
 *.DS_Store
 *.idea
+__pycache__/
 English_pLSA/data/Full-Economic-News-DFE-839861.csv
