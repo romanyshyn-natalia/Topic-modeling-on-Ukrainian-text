@@ -7,7 +7,7 @@ from scipy.sparse import csc_matrix
 from sklearn.cluster import KMeans
 import umap.umap_ as umap
 import numpy as np
-from preprocessor import preprocess
+from preprocessor import preprocess_normalized
 
 SOME_FIXED_SEED = 42
 
@@ -70,7 +70,7 @@ def plot_graph(doc_clean, start, stop, step):
     plt.xlabel("Number of Topics")
     plt.ylabel("Coherence score")
     plt.legend("coherence_values", loc='best')
-    plt.savefig('coherence_measure_graph.png')
+    plt.savefig('coherence_measure_graph1.png')
 
 
 def get_vectorized_sparse_matrix(gensim_vectorized, dct, num_of_topics):
@@ -103,11 +103,11 @@ def plot_clusters_with_topics(topics_matrix, clusters):
                 c=clusters,
                 s=10,  # size
                 edgecolor='none')
-    plt.savefig('topics_clustering_graph.png')
+    plt.savefig('topics_clustering_graph1.png')
 
 
 if __name__ == "__main__":
-    clean_text = preprocess()
+    clean_text = preprocess_normalized()
 
     # create baseline model for LSA topic modeling
     dictionary, term_doc_matrix = vectorize_corpus_tf_idf(clean_text)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     # compute coherence score for different number of topics and plot graph with results
     plot_graph(clean_text, 2, 16, 1)
 
-    optimal_number_of_topics = 7
+    optimal_number_of_topics = 5
 
     # create final model with optimized number of topics and visualize with the help of clusters ans UMAP
     x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)

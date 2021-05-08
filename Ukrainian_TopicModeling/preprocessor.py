@@ -6,7 +6,7 @@ import re
 import nltk
 
 # uncomment for the first time using
-#stanza.download('uk')
+# stanza.download('uk')
 
 NLP = stanza.Pipeline(lang='uk', processors='tokenize, lemma', tokenize_no_ssplit=True)
 
@@ -63,7 +63,7 @@ def remove_punctuation(sample_list):
     """
     punctuation_marks = string.punctuation + '«' + '…' + '»' + '–' + '...' \
                         + '“' + '”' + '``' + "''" + '—' + '’' + '.' + '....' \
-                        + '//' + '-' + '…' + '⠀' + '…' + '-' + ',' + '/' + "." + "-"
+                        + '//' + '-' + '…' + '⠀' + '-' + ',' + '/' + "." + '●'
     return [word for word in sample_list if word not in punctuation_marks]
 
 
@@ -75,10 +75,10 @@ def normalize(corpus):
     """
     tokens = [nltk.word_tokenize(sentence) for sentence in corpus]
     clean_stopwords = [remove_stopwords(sentence_token) for sentence_token in tokens]
-    clean_punctuation = [remove_punctuation(sentence_sample) for sentence_sample in clean_stopwords]
-    clean_numbers = [remove_digits(sentence_sample) for sentence_sample in clean_punctuation]
-    clean_url = [remove_url(sentence_sample) for sentence_sample in clean_numbers]
-    return [remove_www(sentence_sample) for sentence_sample in clean_url]
+    clean_url = [remove_url(sentence_sample) for sentence_sample in clean_stopwords]
+    clean_www = [remove_www(sentence_sample) for sentence_sample in clean_url]
+    clean_numbers = [remove_digits(sentence_sample) for sentence_sample in clean_www]
+    return [remove_punctuation(sentence_sample) for sentence_sample in clean_numbers]
 
 
 def lemmatizer(tokenized):
@@ -92,7 +92,7 @@ def lemmatizer(tokenized):
     return result
 
 
-def preprocess():
+def preprocess_with_lemmatization():
     """
     Combine all steps to obtained preprocessed data
     """
@@ -105,5 +105,17 @@ def preprocess():
     # return [" ".join(elem) for elem in lemmas]
 
 
+def preprocess_normalized():
+    """
+    Combine all steps to obtained preprocessed data
+    """
+    loaded_corpus = load_data()
+    normalized = normalize(loaded_corpus)
+    # uncomment for Gensim LSI
+    return normalized
+    # uncomment for sklearn truncated SVD
+    # return [" ".join(elem) for elem in lemmas]
+
+
 if __name__ == "__main__":
-    preprocess()
+    preprocess_normalized()
