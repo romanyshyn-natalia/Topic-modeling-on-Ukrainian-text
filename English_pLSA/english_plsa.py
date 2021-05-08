@@ -1,9 +1,4 @@
-import sys
-import urllib.request
-import csv
-import matplotlib.pyplot as plt
-
-from plsa import Corpus, Pipeline, Visualize
+from plsa import Corpus, Pipeline
 from plsa.pipeline import DEFAULT_PIPELINE
 from plsa.algorithms import PLSA
 

@@ -9,3 +9,5 @@ scikit-learn~=0.24.1
 scipy~=1.6.3
 gensim~=4.0.1
 umap-learn
+wordcloud~=1.8.1
+plsa~=0.6.0
