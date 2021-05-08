@@ -1,4 +1,3 @@
-from gensim import corpora, models
 from gensim.models import LsiModel
 from gensim.models.coherencemodel import CoherenceModel
 import matplotlib.pyplot as plt
@@ -7,29 +6,12 @@ from scipy.sparse import csc_matrix
 from sklearn.cluster import KMeans
 import umap.umap_ as umap
 import numpy as np
+from pprint import pprint
+
 from preprocessor import preprocess_normalized
+from vectorizer import vectorize_corpus_tf_idf
 
 SOME_FIXED_SEED = 42
-
-
-def vectorize_corpus_word_to_vec(doc_clean):
-    """
-    Create term dictionary of our corpus and Converting list of documents into Document Term Matrix
-    """
-    dct = corpora.Dictionary(doc_clean)
-    doc_term_matrix = [dct.doc2bow(doc) for doc in doc_clean]
-    return dct, doc_term_matrix
-
-
-def vectorize_corpus_tf_idf(clean_corpus):
-    """
-    Create term dictionary of our corpus and Converting list of documents into Document Term Matrix
-    """
-    dct = corpora.Dictionary(clean_corpus)
-    doc_to_vec = [dct.doc2bow(text) for text in clean_corpus]
-    tf_idf = models.TfidfModel(doc_to_vec)  # step 1 -- initialize a model
-    doc_term_matrix_tfidf = tf_idf[doc_to_vec]
-    return dct, doc_term_matrix_tfidf
 
 
 def create_gensim_lsa_model(document_term_matrix, corpus_dictionary, number_of_topics, words):
@@ -38,7 +20,7 @@ def create_gensim_lsa_model(document_term_matrix, corpus_dictionary, number_of_t
     """
     np.random.seed(SOME_FIXED_SEED)
     lsa_model = LsiModel(document_term_matrix, num_topics=number_of_topics, id2word=corpus_dictionary)  # train model
-    print(lsa_model.print_topics(num_topics=number_of_topics, num_words=words))
+    pprint(lsa_model.print_topics(num_topics=number_of_topics, num_words=words))
     return lsa_model
 
 
@@ -70,7 +52,7 @@ def plot_graph(doc_clean, start, stop, step):
     plt.xlabel("Number of Topics")
     plt.ylabel("Coherence score")
     plt.legend("coherence_values", loc='best')
-    plt.savefig('coherence_measure_graph1.png')
+    plt.savefig('coherence_measure_graph_lsa.png')
 
 
 def get_vectorized_sparse_matrix(gensim_vectorized, dct, num_of_topics):
@@ -103,7 +85,7 @@ def plot_clusters_with_topics(topics_matrix, clusters):
                 c=clusters,
                 s=10,  # size
                 edgecolor='none')
-    plt.savefig('topics_clustering_graph1.png')
+    plt.savefig('topics_clustering_graph_lsa.png')
 
 
 if __name__ == "__main__":

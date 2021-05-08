@@ -11,3 +11,4 @@ gensim~=4.0.1
 umap-learn
 wordcloud~=1.8.1
 plsa~=0.6.0
+pyLDAvis~=3.3.1
