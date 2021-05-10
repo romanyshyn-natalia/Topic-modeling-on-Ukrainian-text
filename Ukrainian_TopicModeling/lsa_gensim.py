@@ -2,7 +2,6 @@ from gensim.models import LsiModel
 from gensim.models.coherencemodel import CoherenceModel
 import matplotlib.pyplot as plt
 from gensim.matutils import corpus2csc, corpus2dense
-from scipy.sparse import csc_matrix
 from sklearn.cluster import KMeans
 import umap.umap_ as umap
 import numpy as np
@@ -52,18 +51,17 @@ def plot_graph(doc_clean, start, stop, step):
     plt.xlabel("Number of Topics")
     plt.ylabel("Coherence score")
     plt.legend("coherence_values", loc='best')
-    plt.savefig('coherence_measure_graph_lsa.png')
+    plt.savefig('./resulting_plots/coherence_measure_graph_lsa_normalized.png')
 
 
 def get_vectorized_sparse_matrix(gensim_vectorized, dct, num_of_topics):
     lsa_model = LsiModel(gensim_vectorized, num_topics=num_of_topics, id2word=dct)
     # compute (m ⨉ t) document-topic matrix
     V = corpus2dense(lsa_model[gensim_vectorized], len(lsa_model.projection.s)).T / lsa_model.projection.s
-    # create topics matrix for k-means clustering
+    # create topics matrix for clustering plot
     X_topics = V * lsa_model.projection.s
     # convert vertorized gensim matrix to sparse matrix
-    scipy_csc_matrix = corpus2csc(gensim_vectorized)
-    return X_topics, csc_matrix(scipy_csc_matrix).toarray().T
+    return X_topics, corpus2csc(gensim_vectorized).transpose()
 
 
 def create_k_means_model(num_of_clusters, vectorized_sparse_matrix):
@@ -79,13 +77,13 @@ def plot_clusters_with_topics(topics_matrix, clusters):
     """
     Visualise topics using clusters
     """
-    embedding = umap.UMAP(n_neighbors=100, min_dist=0.5, random_state=SOME_FIXED_SEED).fit_transform(topics_matrix)
+    embedding = umap.UMAP(n_neighbors=100, min_dist=0.5, random_state=100).fit_transform(topics_matrix)
     plt.figure(figsize=(7, 5))
     plt.scatter(embedding[:, 0], embedding[:, 1],
                 c=clusters,
                 s=10,  # size
                 edgecolor='none')
-    plt.savefig('topics_clustering_graph_lsa.png')
+    plt.savefig('./resulting_plots/topics_clustering_lsa_normalized.png')
 
 
 if __name__ == "__main__":
@@ -97,11 +95,12 @@ if __name__ == "__main__":
 
     # hyperparameter tuning
     # compute coherence score for different number of topics and plot graph with results
-    plot_graph(clean_text, 2, 16, 1)
+    # plot_graph(clean_text, 2, 21, 1)
 
     optimal_number_of_topics = 5
 
     # create final model with optimized number of topics and visualize with the help of clusters ans UMAP
     x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)
     cluster_labels = create_k_means_model(optimal_number_of_topics, tf_idf_sparse)
-    plot_clusters_with_topics(x_topics, cluster_labels)
+    # plot_clusters_with_topics(x_topics, cluster_labels)
+    print(x_topics.shape, tf_idf_sparse.shape)
