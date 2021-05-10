@@ -51,7 +51,7 @@ def plot_graph(doc_clean, start, stop, step):
     plt.xlabel("Number of Topics")
     plt.ylabel("Coherence score")
     plt.legend("coherence_values", loc='best')
-    plt.savefig('./resulting_plots/coherence_measure_graph_lsa_normalized.png')
+    plt.savefig('./resulting_plots/lsa/coherence_measure_graph_lsa_normalized.png')
 
 
 def get_vectorized_sparse_matrix(gensim_vectorized, dct, num_of_topics):
@@ -83,7 +83,7 @@ def plot_clusters_with_topics(topics_matrix, clusters):
                 c=clusters,
                 s=10,  # size
                 edgecolor='none')
-    plt.savefig('./resulting_plots/topics_clustering_lsa_normalized.png')
+    plt.savefig('./resulting_plots/lsa/topics_clustering_lsa_normalized.png')
 
 
 if __name__ == "__main__":
@@ -102,5 +102,4 @@ if __name__ == "__main__":
     # create final model with optimized number of topics and visualize with the help of clusters and UMAP
     x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)
     cluster_labels = create_k_means_model(optimal_number_of_topics, tf_idf_sparse)
-    # plot_clusters_with_topics(x_topics, cluster_labels)
-    print(x_topics.shape, tf_idf_sparse.shape)
+    plot_clusters_with_topics(x_topics, cluster_labels)

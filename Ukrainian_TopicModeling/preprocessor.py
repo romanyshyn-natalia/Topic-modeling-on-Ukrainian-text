@@ -99,8 +99,12 @@ def preprocess_with_lemmatization():
     loaded_corpus = load_data()
     normalized = normalize(loaded_corpus)
     lemmas = lemmatizer(normalized)
-    # uncomment for Gensim LSI
-    return lemmas
+    # reclean text after lemmatization
+    res_lemmas = []
+    for sample in lemmas:
+        remove_d = remove_digits(sample)
+        res_lemmas.append(remove_punctuation(remove_d))
+    return res_lemmas
     # uncomment for sklearn truncated SVD
     # return [" ".join(elem) for elem in lemmas]
 
@@ -118,4 +122,4 @@ def preprocess_normalized():
 
 
 if __name__ == "__main__":
-    preprocess_normalized()
+    print(preprocess_with_lemmatization())

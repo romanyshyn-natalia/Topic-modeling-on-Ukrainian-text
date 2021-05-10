@@ -6,13 +6,10 @@ import pandas as pd
 from scipy.sparse import csc_matrix
 from sklearn.cluster import KMeans
 import umap.umap_ as umap
-from sklearn.manifold import TSNE
-from bokeh.plotting import figure, show
-import matplotlib.colors as mcolors
 import numpy as np
 
-from preprocessor import preprocess_normalized, preprocess_with_lemmatization
-from vectorizer import vectorize_corpus_tf_idf, vectorize_corpus_word_to_vec
+from preprocessor import preprocess_with_lemmatization
+from vectorizer import vectorize_corpus_tf_idf
 
 SOME_FIXED_SEED = 42
 
@@ -26,7 +23,7 @@ def create_gensim_lda_model(document_term_matrix, corpus_dictionary, number_of_t
                              num_topics=number_of_topics,
                              random_state=SOME_FIXED_SEED,
                              chunksize=10,
-                             passes=1,
+                             passes=3,
                              alpha=0.01,
                              eta=0.9)
     pprint(lda_model.print_topics())
@@ -41,7 +38,7 @@ def compute_coherence_values(dct, corpus, texts, limit, start=2, step=3):
     model_list = []
     for num_topics in range(start, limit, step):
         model = LdaMulticore(corpus=corpus, id2word=dct, num_topics=num_topics, random_state=SOME_FIXED_SEED,
-                             chunksize=10, passes=1, alpha=0.01, eta=0.9)
+                             chunksize=10, passes=3, alpha=0.01, eta=0.9)
         model_list.append(model)
         coherence_model = CoherenceModel(model=model, texts=texts, dictionary=dct, coherence='c_v')
         coherence_values.append(coherence_model.get_coherence())
@@ -59,7 +56,7 @@ def plot_graph(doc_clean, start, stop, step):
     plt.xlabel("Number of Topics")
     plt.ylabel("Coherence score")
     plt.legend("coherence_values", loc='best')
-    plt.savefig('./resulting_plots/coherence_measure_graph_lda_lemmatized.png')
+    plt.savefig('./resulting_plots/lda/coherence_measure_graph_lda_lemmatized.png')
 
 
 def get_vectorized_sparse_matrix(gensim_vectorized, dct, num_of_topics):
@@ -68,7 +65,7 @@ def get_vectorized_sparse_matrix(gensim_vectorized, dct, num_of_topics):
                              num_topics=num_of_topics,
                              random_state=SOME_FIXED_SEED,
                              chunksize=10,
-                             passes=1,
+                             passes=3,
                              alpha=0.01,
                              eta=0.9)
     df = pd.DataFrame(lda_model.get_document_topics(gensim_vectorized, minimum_probability=0.0, per_word_topics=False))
@@ -96,21 +93,21 @@ def plot_clusters_with_topics(topics_matrix, clusters):
                 c=clusters,
                 s=10,  # size
                 edgecolor='none')
-    plt.savefig('./resulting_plots/topics_clustering_graph_lda_lemmatized.png')
+    plt.savefig('./resulting_plots/lda/topics_clustering_graph_lda_lemmatized.png')
 
 
 if __name__ == "__main__":
     clean_text = preprocess_with_lemmatization()
 
     # create baseline model for LDA topic modeling
-    dictionary, term_doc_matrix = vectorize_corpus_word_to_vec(clean_text)
+    dictionary, term_doc_matrix = vectorize_corpus_tf_idf(clean_text)
     base_model = create_gensim_lda_model(term_doc_matrix, dictionary, 5)
 
     # hyperparameter tuning
     # compute coherence score for different number of topics and plot graph with results
-    # plot_graph(clean_text, 2, 21, 1)
+    # plot_graph(clean_text, 2, 17, 1)
 
-    optimal_number_of_topics = 5
+    optimal_number_of_topics = 15
     #
     # # create final model with optimized number of topics and visualize with the help of clusters ans UMAP
     # x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)
@@ -121,7 +118,7 @@ if __name__ == "__main__":
     # Get topic weights and dominant topics ------------
 
     # n-1 rows each is a vector with i-1 positions, where n the number of documents
-    # i the topic number and tmp[i] = probability of topic i
+    # # i the topic number and tmp[i] = probability of topic i
     topic_weights = []
     for row_list in base_model[term_doc_matrix]:
         tmp = np.zeros(5)
@@ -131,9 +128,10 @@ if __name__ == "__main__":
 
     # Array of topic weights
     arr = pd.DataFrame(topic_weights).fillna(0).values
+    print(arr.shape)
     cluster_labels = create_k_means_model(optimal_number_of_topics, corpus2csc(term_doc_matrix).transpose())
     plot_clusters_with_topics(arr, cluster_labels)
-    print(arr.shape)
+
 
     # # # Keep the well separated points (optional)
     # # # arr = arr[np.amax(arr, axis=1) > 0.01]
