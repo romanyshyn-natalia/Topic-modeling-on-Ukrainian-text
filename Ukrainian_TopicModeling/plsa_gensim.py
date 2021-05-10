@@ -78,16 +78,24 @@ def plot_clusters_with_topics(topics_matrix, clusters):
 
 
 if __name__ == "__main__":
-    # For the first time using: uncomment code for downloading ua corpus in the preprocessor module
-
-    # Uncomment to use preprocessed text with lemmatization
-    # text = preprocess_with_lemmatization()
-
-    # Use preprocessed text without lemmatization
-    text = preprocess_normalized()
-    dct = Dictionary(text[:2])
-    print(dct.items())
-
+    x = range(2, 13, 1)
+    plt.plot(x, [0.24862516871891016, 0.3460672466169208, 0.31760168499772407, 0.3285116590501592, 0.33832683377588246,
+                 0.35241208177724, 0.38477830107102784, 0.3729613650152243, 0.3778253405113229, 0.3810417049391049,
+                 0.38329968618732657])
+    plt.xlabel("Number of Topics")
+    plt.ylabel("Coherence score")
+    plt.legend("coherence_values", loc='best')
+    plt.savefig('coherence_measure_graph_lemmatized.png')
+    # # For the first time using: uncomment code for downloading ua corpus in the preprocessor module
+    #
+    # # Uncomment to use preprocessed text with lemmatization
+    # # text = preprocess_with_lemmatization()
+    #
+    # # Use preprocessed text without lemmatization
+    # text = preprocess_normalized()
+    # dct = Dictionary(text[:2])
+    # print(dct.keys())
+    #
     # # For that pLSA implementation, we will need to use each document not as a list, but as a string,
     # # so we apply additional preparation
     # prepared_text = prepare_preprocessed_text(text)  # 142822 words
