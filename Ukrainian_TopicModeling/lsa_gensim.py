@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     optimal_number_of_topics = 5
 
-    # create final model with optimized number of topics and visualize with the help of clusters ans UMAP
+    # create final model with optimized number of topics and visualize with the help of clusters and UMAP
     x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)
     cluster_labels = create_k_means_model(optimal_number_of_topics, tf_idf_sparse)
     # plot_clusters_with_topics(x_topics, cluster_labels)
