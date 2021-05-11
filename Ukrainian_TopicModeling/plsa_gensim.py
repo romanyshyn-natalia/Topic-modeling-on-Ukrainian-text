@@ -6,9 +6,10 @@ from plsa.algorithms import PLSA
 from plsa.preprocessors import tokenize
 from gensim.models.coherencemodel import CoherenceModel
 from gensim.corpora import Dictionary
-from sklearn.cluster import KMeans
+from collections import Counter
 import matplotlib.pyplot as plt
-import umap.umap_ as umap
+import matplotlib.colors as m_colors
+import pandas as pd
 
 from preprocessor import preprocess_normalized, preprocess_with_lemmatization
 
@@ -55,28 +56,6 @@ def prepare_preprocessed_text(preprocessed_text):
     return prepared_text
 
 
-def create_k_means_model(num_of_clusters, sparse_matrix):
-    """
-    Create k-means clustering model using sklearn
-    """
-    km = KMeans(n_clusters=num_of_clusters, random_state=SOME_FIXED_SEED)
-    km.fit(sparse_matrix)
-    return km.labels_.tolist()
-
-
-def plot_clusters_with_topics(topics_matrix, clusters):
-    """
-    Visualise topics using clusters
-    """
-    embedding = umap.UMAP(n_neighbors=100, min_dist=0.5, random_state=100).fit_transform(topics_matrix)
-    plt.figure(figsize=(7, 5))
-    plt.scatter(embedding[:, 0], embedding[:, 1],
-                c=clusters,
-                s=10,  # size
-                edgecolor='none')
-    plt.savefig('./resulting_plots/topics_clustering_plsa_normalized.png')
-
-
 if __name__ == "__main__":
     # For the first time using: uncomment code for downloading ua corpus in the preprocessor module
 
@@ -91,48 +70,51 @@ if __name__ == "__main__":
     prepared_text = prepare_preprocessed_text(text)  # 142822 words
     #
     # # Performing pLSa
-    # # TODO: uncomment
     optimal_number_of_topics = 7
     #
     using_tf_idf = True
     pipeline = Pipeline(tokenize)
 
     result = perform_plsa(prepared_text, pipeline)
-    #
-    # # Visualization with the help of clusters and UMAP
-    SOME_FIXED_SEED = 42
-    #
-    # # compute (m ⨉ t) document-topic matrix
-    # # V = corpus2dense(lsa_model[gensim_vectorized], len(lsa_model.projection.s)).T / lsa_model.projection.s
-    # # # create topics matrix for clustering plot
-    # # X_topics = V * lsa_model.projection.s
-    # # # convert vertorized gensim matrix to sparse matrix
-    # # X_topics, corpus2csc(gensim_vectorized).transpose()
-    #
-    # # x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)
-    # # Creating sparse matrix
-    # # sparse = []
-    # # for topic in result.word_given_topic:
-    # #     sparse.append([])
-    # #     sparse[-1].append(len(sparse) - 1)
-    # #     topic = sorted(topic, key=lambda x: abs(x[1]))
-    # #     string = ''
-    # #     for word in topic[-7:]:
-    # #         string += f'{word[1]}*"{word[0]}" + '
-    # #     string = string[:-3]
-    # #     sparse[-1].append(string)
-    #
-    result_for_plot = []
-    for topic in result.word_given_topic:
-        result_for_plot.append([])
-        for word_tuple in topic:
-            result_for_plot[-1].append(word_tuple[1])
 
-    plt.figure(figsize=(7, 5))
-    # plt.scatter(result_for_plot, result_for_plot,
-    #             s=optimal_number_of_topics,  # size
-    #             edgecolor='none')
-    plt.scatter(result_for_plot[:, 0], result_for_plot[:, 1],
-                s=optimal_number_of_topics,  # size
-                edgecolor='none')
-    plt.show()
+    # Creating key-words list
+    topics = []
+    for topic in result.word_given_topic:
+        topics.append([])
+        topics[-1].append(len(topics) - 1)
+        topics[-1].append([])
+        topic = sorted(topic, key=lambda x: abs(x[1]))
+        for word in topic[-10:]:
+            topics[-1][-1].append(word)
+
+    data_flat = [w for w_list in text for w in w_list]
+    counter = Counter(data_flat)
+
+    out = []
+    for i, topic in topics:
+        for word, weight in topic:
+            out.append([word, i, weight, counter[word]])
+
+    df = pd.DataFrame(out, columns=['word', 'topic_id', 'importance', 'word_count'])
+
+    # Plot Word Count and Weights of Topic Keywords
+    fig, axes = plt.subplots(2, 2, figsize=(16, 10), dpi=160)
+    cols = [color for name, color in m_colors.TABLEAU_COLORS.items()]
+    for i, ax in enumerate(axes.flatten()):
+        ax.bar(x='word', height="word_count", data=df.loc[df.topic_id == i, :], color=cols[i], width=0.5, alpha=0.3,
+               label='Word Count')
+        ax_twin = ax.twinx()
+        ax_twin.bar(x='word', height="importance", data=df.loc[df.topic_id == i, :], color=cols[i], width=0.2,
+                    label='Weights')
+        ax.set_ylabel('Word Count', color=cols[i])
+        ax_twin.set_ylim(0, 0.008)
+        ax.set_ylim(0, 800)
+        ax.set_title('Topic: ' + str(i), color=cols[i], fontsize=16)
+        ax.tick_params(axis='y', left=False)
+        ax.set_xticklabels(df.loc[df.topic_id == i, 'word'], rotation=30, horizontalalignment='right')
+        ax.legend(loc='upper left')
+        ax_twin.legend(loc='upper right')
+
+    fig.tight_layout(w_pad=2)
+    fig.suptitle('Word Count and Importance of Topic Keywords LDA', fontsize=22, y=1.05)
+    plt.savefig('./resulting_plots/plsa/importance_of_topic_keywords_plsa.png')
