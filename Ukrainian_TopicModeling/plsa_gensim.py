@@ -1,7 +1,7 @@
 # Gensim in the name of the module refers to the Coherence Model from the gensim library
 # pLSA itself is imported from a plsa module, because gensim does not provide pLSA
 
-from plsa import Corpus, Pipeline
+from plsa import Corpus, Pipeline, Visualize
 from plsa.algorithms import PLSA
 from plsa.preprocessors import tokenize
 from gensim.models.coherencemodel import CoherenceModel
@@ -85,34 +85,54 @@ if __name__ == "__main__":
 
     # Use preprocessed text without lemmatization
     text = preprocess_normalized()
-    dct = Dictionary(text[:2])
 
-    # For that pLSA implementation, we will need to use each document not as a list, but as a string,
-    # so we apply additional preparation
+    # # For that pLSA implementation, we will need to use each document not as a list, but as a string,
+    # # so we apply additional preparation
     prepared_text = prepare_preprocessed_text(text)  # 142822 words
-
-    # Performing pLSa
-    # TODO: uncomment
-    # optimal_number_of_topics = 7
-    optimal_number_of_topics = 2
-
+    #
+    # # Performing pLSa
+    # # TODO: uncomment
+    optimal_number_of_topics = 7
+    #
     using_tf_idf = True
     pipeline = Pipeline(tokenize)
 
     result = perform_plsa(prepared_text, pipeline)
-
-    # Visualization with the help of clusters and UMAP
+    #
+    # # Visualization with the help of clusters and UMAP
     SOME_FIXED_SEED = 42
-    # x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)
-    # Creating sparse matrix
-    dct = Dictionary(prepared_text)
-    sparse = []
+    #
+    # # compute (m ⨉ t) document-topic matrix
+    # # V = corpus2dense(lsa_model[gensim_vectorized], len(lsa_model.projection.s)).T / lsa_model.projection.s
+    # # # create topics matrix for clustering plot
+    # # X_topics = V * lsa_model.projection.s
+    # # # convert vertorized gensim matrix to sparse matrix
+    # # X_topics, corpus2csc(gensim_vectorized).transpose()
+    #
+    # # x_topics, tf_idf_sparse = get_vectorized_sparse_matrix(term_doc_matrix, dictionary, optimal_number_of_topics)
+    # # Creating sparse matrix
+    # # sparse = []
+    # # for topic in result.word_given_topic:
+    # #     sparse.append([])
+    # #     sparse[-1].append(len(sparse) - 1)
+    # #     topic = sorted(topic, key=lambda x: abs(x[1]))
+    # #     string = ''
+    # #     for word in topic[-7:]:
+    # #         string += f'{word[1]}*"{word[0]}" + '
+    # #     string = string[:-3]
+    # #     sparse[-1].append(string)
+    #
+    result_for_plot = []
     for topic in result.word_given_topic:
-        sparse.append([])
+        result_for_plot.append([])
         for word_tuple in topic:
-            sparse[-1].append(word_tuple[0])
+            result_for_plot[-1].append(word_tuple[1])
 
-    # K-Means
-    cluster_labels = create_k_means_model(optimal_number_of_topics, sparse)
-    print(len(sparse), len(sparse[0]))
-    # plot_clusters_with_topics(x_topics, cluster_labels)
+    plt.figure(figsize=(7, 5))
+    # plt.scatter(result_for_plot, result_for_plot,
+    #             s=optimal_number_of_topics,  # size
+    #             edgecolor='none')
+    plt.scatter(result_for_plot[:, 0], result_for_plot[:, 1],
+                s=optimal_number_of_topics,  # size
+                edgecolor='none')
+    plt.show()
