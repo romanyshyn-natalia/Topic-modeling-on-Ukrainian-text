@@ -25,7 +25,7 @@ The dataset which we have used is [UA-GEC](https://github.com/grammarly/ua-gec) 
 ![image](https://user-images.githubusercontent.com/57792587/118008713-01947d00-b356-11eb-962b-1b87f3d6ba50.png)
 ![image](https://user-images.githubusercontent.com/57792587/118008886-31dc1b80-b356-11eb-8b15-614b7fa00fdd.png)
 
-From Plot 1 we see that the best model is LSA with 63% coherence score on TF-IDF not lemmatizated features. From Plot B we see that lemmatized features work better for LDA — 62% coherence score. 
+From Plot 1 we see that the best model is LSA with 63% coherence score on TF-IDF not lemmatizated features. From Plot 2 we see that lemmatized features work better for LDA — 62% coherence score. 
 
 ### Credits:
 * Natalia Romanyshyn
